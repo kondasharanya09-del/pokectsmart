@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PocketSmart - Student Budgeting</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f3f5fb;
+  color: #202944;
+}
+
+header {
+  background: #5146e5;
+  color: white;
+  padding: 24px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0 0 8px;
+}
+
+.container {
+  max-width: 950px;
+  margin: 25px auto;
+  padding: 15px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  margin-bottom: 18px;
+  border-radius: 16px;
+  box-shadow: 0 3px 12px #0000000a;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.stat {
+  background: #f0efff;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.stat p {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+
+.stat h2 {
+  margin: 0;
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0;
+  border-radius: 8px;
+  border: 1px solid #d8dbea;
+  font-size: 15px;
+}
+
+button {
+  background: #5146e5;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #3e34c5;
+}
+
+.progress {
+  height: 13px;
+  background: #e5e7f0;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+#bar {
+  height: 100%;
+  width: 0%;
+  background: #5146e5;
+  transition: width 0.3s;
+}
+
+#message {
+  padding: 14px;
+  border-radius: 10px;
+  line-height: 1.5;
+}
+
+.good {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.bad {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px 5px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  color: #5146e5;
+}
+
+.delete {
+  width: auto;
+  padding: 7px 10px;
+  background: #ef4444;
+}
+
+footer {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+
+@media (max-width: 600px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+  th, td {
+    font-size: 13px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>💜 PocketSmart</h1>
+  <p>Spend wisely today. Save confidently tomorrow.</p>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>My Monthly Plan</h2>
+
+    <label for="budget">Monthly money available (₹)</label>
+    <input id="budget" type="number" min="0"
+           value="5000">
+
+    <label for="goal">My savings goal (₹)</label>
+    <input id="goal" type="number" min="0"
+           value="1500">
+
+    <button onclick="updatePlan()">Update Budget</button>
+  </section>
+
+  <section class="stats">
+    <div class="stat">
+      <p>💵 Monthly Budget</p>
+      <h2 id="budgetView">₹5,000</h2>
+    </div>
+
+    <div class="stat">
+      <p>🛍️ Total Spent</p>
+      <h2 id="spentView">₹0</h2>
+    </div>
+
+    <div class="stat">
+      <p>🐷 Money Remaining</p>
+      <h2 id="remainingView">₹5,000</h2>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>📊 My Spending</h2>
+    <p id="progressText">0% of your budget spent</p>
+    <div class="progress">
+      <div id="bar"></div>
+    </div>
+    <p id="message" class="good"></p>
+  </section>
+
+  <section class="card">
+    <h2>➕ Add an Expense</h2>
+
+    <form id="expenseForm">
+      <label for="item">Expense name</label>
+      <input id="item" type="text"
+             placeholder="e.g. College lunch" required>
+
+      <label for="category">Category</label>
+      <select id="category">
+        <option>Food</option>
+        <option>Travel</option>
+        <option>Shopping</option>
+        <option>College Supplies</option>
+        <option>Entertainment</option>
+        <option>Other</option>
+      </select>
+
+      <label for="amount">Amount (₹)</label>
+      <input id="amount" type="number" min="0.01"
+             step="0.01" placeholder="Enter amount" required>
+
+      <button type="submit">Add Expense</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>🧾 Expense History</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Expense</th>
+          <th>Category</th>
+          <th>Amount</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="expenseList"></tbody>
+    </table>
+
+    <p id="emptyText">No expenses yet.</p>
+    <button onclick="resetExpenses()"
+            style="background:#64748b">
+      Reset Expenses
+    </button>
+  </section>
+
+  <footer>
+    Made for students, by students 💜
+    <br>PocketSmart Hackathon Project
+  </footer>
+
+</main>
+
+<script>
+let expenses = [
+  { id: 1, name: "College lunch", category: "Food", amount: 500 },
+  { id: 2, name: "Bus pass", category: "Travel", amount: 400 },
+  { id: 3, name: "Notebooks", category: "College Supplies", amount: 300 },
+  { id: 4, name: "Snacks", category: "Food", amount: 200 },
+  { id: 5, name: "Movie", category: "Entertainment", amount: 250 }
+];
+
+let budget = 5000;
+let goal = 1500;
+let nextId = 6;
+
+const money = value => "₹" + value.toLocaleString("en-IN", {
+  maximumFractionDigits: 2
+});
+
+function updatePlan() {
+  const newBudget = Number(document.getElementById("budget").value);
+  const newGoal = Number(document.getElementById("goal").value);
+
+  if (!Number.isFinite(newBudget) || newBudget < 0 ||
+      !Number.isFinite(newGoal) || newGoal < 0) {
+    alert("Please enter valid budget and savings values.");
+    return;
+  }
+
+  budget = newBudget;
+  goal = newGoal;
+  render();
+}
+
+document.getElementById("expenseForm")
+.addEventListener("submit", function(event) {
+  event.preventDefault();
+
+  const name = document.getElementById("item").value.trim();
+  const category = document.getElementById("category").value;
+  const amount = Number(document.getElementById("amount").value);
+
+  if (!name || !Number.isFinite(amount) || amount <= 0) {
+    alert("Please enter a valid expense and amount.");
+    return;
+  }
+
+  expenses.push({
+    id: nextId++,
+    name,
+    category,
+    amount
+  });
+
+  this.reset();
+  render();
+});
+
+function deleteExpense(id) {
+  expenses = expenses.filter(expense => expense.id !== id);
+  render();
+}
+
+function resetExpenses() {
+  if (confirm("Clear all expenses?")) {
+    expenses = [];
+    render();
+  }
+}
+
+function render() {
+  const spent = expenses.reduce(
+    (total, expense) => total + expense.amount, 0
+  );
+
+  const remaining = budget - spent;
+  const savingsRate = budget > 0
+    ? Math.max(0, Math.min(100, (spent / budget) * 100))
+    : (spent > 0 ? 100 : 0);
+
+  document.getElementById("budgetView").textContent = money(budget);
+  document.getElementById("spentView").textContent = money(spent);
+  document.getElementById("remainingView").textContent = money(remaining);
+
+  document.getElementById("progressText").textContent =
+    Math.round(savingsRate) + "% of your budget spent";
+
+  document.getElementById("bar").style.width = savingsRate + "%";
+
+  const message = document.getElementById("message");
+
+  if (remaining < 0) {
+    message.className = "bad";
+    message.textContent =
+      "⚠️ Budget exceeded! You spent " + money(-remaining) +
+      " more than your monthly budget. Review your expenses.";
+  } else if (remaining < goal) {
+    message.className = "bad";
+    message.textContent =
+      "⚠️ Savings alert! You have " + money(remaining) +
+      " left, below your savings goal of " + money(goal) +
+      ". Try reducing non-essential spending.";
+  } else {
+    message.className = "good";
+    message.textContent =
+      "🎉 Great job! You have " + money(remaining) +
+      " remaining and have met your savings goal. Keep up your smart money habits!";
+  }
+
+  const list = document.getElementById("expenseList");
+  list.replaceChildren();
+
+  document.getElementById("emptyText").hidden = expenses.length > 0;
+
+  expenses.forEach(expense => {
+    const row = document.createElement("tr");
+
+    [expense.name, expense.category, money(expense.amount)]
+      .forEach(value => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
+
+    const actionCell = document.createElement("td");
+    const button = document.createElement("button");
+
+    button.textContent = "Delete";
+    button.className = "delete";
+    button.setAttribute("aria-label", "Delete " + expense.name);
+    button.addEventListener("click", () => deleteExpense(expense.id));
+
+    actionCell.appendChild(button);
+    row.appendChild(actionCell);
+    list.appendChild(row);
+  });
+}
+
+render();
+</script>
+
+</body>
+</html>
